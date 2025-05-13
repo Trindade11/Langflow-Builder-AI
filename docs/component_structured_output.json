@@ -1,0 +1,142 @@
+{
+  "name": "StructuredOutput",
+  "display_name": "Structured Output",
+  "description": "Transforma respostas de modelos de linguagem (LLMs) em formatos de dados estruturados. Ideal para extrair informações específicas ou criar saídas consistentes a partir de texto livre. Permite definir um schema customizado para o output, facilitando integrações com bancos de dados, planilhas ou APIs. Útil em casos como extração de entidades, geração de relatórios automáticos e padronização de respostas.",
+  "category": "processor",
+  "tags": ["estruturação", "extração", "LLM", "schema", "dados estruturados", "automação"],
+  "icon": "braces",
+  "minimized": false,
+  "libraries": [
+    "pydantic",
+    "trustcall",
+    "langflow.base.models.chat_result",
+    "langflow.custom",
+    "langflow.helpers.base_model",
+    "langflow.io",
+    "langflow.schema.data",
+    "langflow.schema.dataframe",
+    "langflow.schema.table"
+  ],
+  "inputs": [
+    {
+      "name": "llm",
+      "display_name": "Language Model",
+      "type": "LanguageModel",
+      "widget": "HandleInput",
+      "info": "Modelo de linguagem utilizado para gerar a saída estruturada.",
+      "required": true
+    },
+    {
+      "name": "input_value",
+      "display_name": "Input Message",
+      "type": "str",
+      "widget": "MessageTextInput",
+      "info": "Mensagem de entrada para o modelo de linguagem.",
+      "required": true,
+      "tool_mode": true
+    },
+    {
+      "name": "system_prompt",
+      "display_name": "Format Instructions",
+      "type": "str",
+      "widget": "MultilineInput",
+      "info": "Instruções para o modelo sobre como formatar a saída. Exemplo: 'Retorne um JSON com as chaves nome, idade e email.'",
+      "required": true,
+      "advanced": true,
+      "default": "You are an AI system designed to extract structured information from unstructured text. ..."
+    },
+    {
+      "name": "schema_name",
+      "display_name": "Schema Name",
+      "type": "str",
+      "widget": "MessageTextInput",
+      "info": "Nome do schema de dados de saída.",
+      "advanced": true
+    },
+    {
+      "name": "output_schema",
+      "display_name": "Output Schema",
+      "type": "table",
+      "widget": "TableInput",
+      "info": "Defina a estrutura e os tipos de dados para a saída do modelo.",
+      "required": true,
+      "table_schema": [
+        {
+          "name": "name",
+          "display_name": "Name",
+          "type": "str",
+          "description": "Nome do campo de saída.",
+          "default": "field"
+        },
+        {
+          "name": "description",
+          "display_name": "Description",
+          "type": "str",
+          "description": "Descrição do campo de saída.",
+          "default": "description of field"
+        },
+        {
+          "name": "type",
+          "display_name": "Type",
+          "type": "str",
+          "description": "Tipo de dado do campo (ex: str, int, float, bool, list, dict).",
+          "options": ["str", "int", "float", "bool", "list", "dict"],
+          "default": "str"
+        },
+        {
+          "name": "multiple",
+          "display_name": "Multiple",
+          "type": "boolean",
+          "description": "Se verdadeiro, o campo será uma lista do tipo especificado.",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "multiple",
+      "display_name": "Generate Multiple",
+      "type": "bool",
+      "widget": "BoolInput",
+      "info": "[Deprecated] Sempre definido como True.",
+      "advanced": true,
+      "default": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "structured_output",
+      "display_name": "Structured Output",
+      "type": "Data",
+      "widget": "Output",
+      "method": "build_structured_output",
+      "info": "Saída estruturada conforme o schema definido."
+    },
+    {
+      "name": "structured_output_dataframe",
+      "display_name": "DataFrame",
+      "type": "DataFrame",
+      "widget": "Output",
+      "method": "as_dataframe",
+      "info": "Saída estruturada em formato de DataFrame para uso em análises tabulares."
+    }
+  ],
+  "relations": [],
+  "vector": [],
+  "metadata": {
+    "methods": [
+      {
+        "name": "build_structured_output",
+        "description": "Gera a saída estruturada a partir do modelo de linguagem e do schema definido."
+      },
+      {
+        "name": "as_dataframe",
+        "description": "Converte a saída estruturada em um DataFrame."
+      }
+    ],
+    "examples": [
+      "Use este componente para extrair entidades de textos livres e gerar relatórios automáticos em formato tabular."
+    ],
+    "created_at": "2024-05-12T15:00:00Z",
+    "updated_at": "2024-05-12T15:00:00Z"
+  }
+} 
