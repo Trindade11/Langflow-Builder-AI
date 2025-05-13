@@ -1,0 +1,244 @@
+{
+    "version": "0.1.0",
+    "langflow_version": "0.5.0",
+    "component_categories": {
+        "inputs": {
+            "description": "Componentes que recebem dados externos",
+            "base_class": "BaseInput",
+            "common_attributes": [
+                "name",
+                "description",
+                "type",
+                "required"
+            ],
+            "examples": [
+                {
+                    "name": "TextInput",
+                    "description": "Recebe texto como entrada",
+                    "type": "str",
+                    "required": true
+                }
+            ]
+        },
+        "outputs": {
+            "description": "Componentes que retornam dados processados",
+            "base_class": "BaseOutput",
+            "common_attributes": [
+                "name",
+                "description",
+                "type",
+                "format"
+            ],
+            "examples": [
+                {
+                    "name": "TextOutput",
+                    "description": "Retorna texto processado",
+                    "type": "str",
+                    "format": "plain"
+                }
+            ]
+        },
+        "processors": {
+            "description": "Componentes que processam dados",
+            "base_class": "BaseProcessor",
+            "common_attributes": [
+                "name",
+                "description",
+                "inputs",
+                "outputs",
+                "parameters"
+            ],
+            "examples": [
+                {
+                    "name": "TextProcessor",
+                    "description": "Processa texto",
+                    "inputs": [
+                        {
+                            "name": "text",
+                            "type": "str",
+                            "description": "Texto a ser processado"
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "name": "processed_text",
+                            "type": "str",
+                            "description": "Texto processado"
+                        }
+                    ],
+                    "parameters": [
+                        {
+                            "name": "case_sensitive",
+                            "type": "bool",
+                            "default": true,
+                            "description": "Considerar maiúsculas e minúsculas"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "component_structure": {
+        "required_files": [
+            "__init__.py",
+            "component.py",
+            "metadata.json"
+        ],
+        "class_structure": {
+            "base_attributes": [
+                "name",
+                "description",
+                "category",
+                "version"
+            ],
+            "required_methods": [
+                "build",
+                "run"
+            ]
+        }
+    },
+    "implementation_patterns": {
+        "input_handling": {
+            "validation": [
+                "type_checking",
+                "required_fields",
+                "format_validation"
+            ],
+            "error_handling": [
+                "custom_exceptions",
+                "error_messages",
+                "fallback_values"
+            ]
+        },
+        "output_formatting": {
+            "supported_formats": [
+                "json",
+                "text",
+                "binary"
+            ],
+            "serialization": [
+                "json_serialization",
+                "text_serialization",
+                "binary_serialization"
+            ]
+        },
+        "parameter_management": {
+            "validation": [
+                "type_checking",
+                "range_validation",
+                "enum_validation"
+            ],
+            "default_values": [
+                "static_defaults",
+                "dynamic_defaults",
+                "environment_variables"
+            ]
+        }
+    },
+    "best_practices": {
+        "code_style": {
+            "naming": [
+                "snake_case_for_methods",
+                "camelCase_for_parameters",
+                "PascalCase_for_classes"
+            ],
+            "documentation": [
+                "docstrings",
+                "type_hints",
+                "examples"
+            ]
+        },
+        "error_handling": {
+            "exceptions": [
+                "custom_exception_classes",
+                "meaningful_error_messages",
+                "proper_exception_hierarchy"
+            ],
+            "logging": [
+                "structured_logging",
+                "log_levels",
+                "context_information"
+            ]
+        },
+        "testing": {
+            "unit_tests": [
+                "test_cases",
+                "edge_cases",
+                "error_cases"
+            ],
+            "integration_tests": [
+                "component_interaction",
+                "end_to_end_flows"
+            ]
+        }
+    },
+    "examples": {
+        "simple_component": {
+            "name": "WordCounter",
+            "description": "Conta palavras em um texto",
+            "category": "processors",
+            "implementation": {
+                "inputs": [
+                    {
+                        "name": "text",
+                        "type": "str",
+                        "description": "Texto para contar palavras"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "count",
+                        "type": "int",
+                        "description": "Número de palavras"
+                    }
+                ],
+                "parameters": []
+            }
+        },
+        "complex_component": {
+            "name": "TextAnalyzer",
+            "description": "Analisa texto com múltiplas métricas",
+            "category": "processors",
+            "implementation": {
+                "inputs": [
+                    {
+                        "name": "text",
+                        "type": "str",
+                        "description": "Texto para análise"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "word_count",
+                        "type": "int",
+                        "description": "Número de palavras"
+                    },
+                    {
+                        "name": "char_count",
+                        "type": "int",
+                        "description": "Número de caracteres"
+                    },
+                    {
+                        "name": "sentiment",
+                        "type": "float",
+                        "description": "Pontuação de sentimento"
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "language",
+                        "type": "str",
+                        "default": "en",
+                        "description": "Idioma do texto"
+                    },
+                    {
+                        "name": "detailed_analysis",
+                        "type": "bool",
+                        "default": false,
+                        "description": "Incluir análise detalhada"
+                    }
+                ]
+            }
+        }
+    }
+} 
