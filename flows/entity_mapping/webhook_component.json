@@ -1,0 +1,22 @@
+{
+  "name": "WebhookComponent",
+  "display_name": "Webhook",
+  "description": "Recebe um payload JSON e emite um objeto Data.",
+  "icon": "webhook",
+  "inputs": [
+    {
+      "name": "payload",
+      "display_name": "Payload",
+      "type": "MultilineInput",
+      "info": "Texto JSON bruto recebido via HTTP POST."
+    }
+  ],
+  "outputs": [
+    {
+      "name": "data",
+      "display_name": "Data",
+      "type": "Data",
+      "method": "build_data"
+    }
+  ]
+} 

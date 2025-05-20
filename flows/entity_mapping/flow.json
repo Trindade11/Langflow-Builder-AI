@@ -1,0 +1,98 @@
+{
+  "name": "Entity Mapping Flow",
+  "description": "Flow para mapeamento e indexação de entidades corporativas",
+  "version": "1.0.0",
+  "type": "entity_mapping",
+  "nodes": [
+    {
+      "id": "webhook",
+      "type": "WebhookComponent",
+      "position": {
+        "x": 100,
+        "y": 100
+      },
+      "data": {
+        "payload": ""
+      }
+    },
+    {
+      "id": "update_data",
+      "type": "UpdateDataComponent",
+      "position": {
+        "x": 300,
+        "y": 100
+      },
+      "data": {
+        "number_of_fields": 3,
+        "text_key": "text",
+        "text_key_validator": true,
+        "field_1_key": {
+          "key": "tipo",
+          "value": "entidade"
+        },
+        "field_2_key": {
+          "key": "data_processamento",
+          "value": "{{datetime.now()}}"
+        },
+        "field_3_key": {
+          "key": "status",
+          "value": "processado"
+        }
+      }
+    },
+    {
+      "id": "azure_embeddings",
+      "type": "AzureOpenAIEmbeddingsComponent",
+      "position": {
+        "x": 300,
+        "y": 300
+      },
+      "data": {
+        "model": "text-embedding-ada-002",
+        "azure_endpoint": "https://example-resource.azure.openai.com/",
+        "azure_deployment": "deployment-name",
+        "api_version": "2023-08-01-preview",
+        "api_key": "<SUA_API_KEY>",
+        "dimensions": 1536
+      }
+    },
+    {
+      "id": "mongo_vector_upsert",
+      "type": "MongoVectorUpsertComponent",
+      "position": {
+        "x": 500,
+        "y": 100
+      },
+      "data": {
+        "collection_name": "entities",
+        "index_name": "entity_search"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "webhook",
+      "target": "update_data",
+      "sourceHandle": "data",
+      "targetHandle": "old_data"
+    },
+    {
+      "source": "update_data",
+      "target": "azure_embeddings",
+      "sourceHandle": "data",
+      "targetHandle": "input"
+    },
+    {
+      "source": "update_data",
+      "target": "mongo_vector_upsert",
+      "sourceHandle": "data",
+      "targetHandle": "ingest_data"
+    },
+    {
+      "source": "azure_embeddings",
+      "target": "mongo_vector_upsert",
+      "sourceHandle": "embeddings",
+      "targetHandle": "embeddings"
+    }
+  ]
+} 

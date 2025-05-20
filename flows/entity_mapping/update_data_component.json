@@ -1,0 +1,52 @@
+{
+  "name": "UpdateDataComponent",
+  "display_name": "Update Data",
+  "description": "Atualiza ou adiciona dinamicamente campos aos dados recebidos.",
+  "icon": "FolderSync",
+  "inputs": [
+    {
+      "name": "old_data",
+      "display_name": "Data",
+      "type": "DataInput",
+      "info": "Registro a ser atualizado.",
+      "is_list": true,
+      "required": true
+    },
+    {
+      "name": "number_of_fields",
+      "display_name": "Number of Fields",
+      "type": "IntInput",
+      "info": "Número de campos a serem adicionados ao registro.",
+      "real_time_refresh": true,
+      "value": 0,
+      "range_spec": {
+        "min": 1,
+        "max": 15,
+        "step": 1,
+        "step_type": "int"
+      }
+    },
+    {
+      "name": "text_key",
+      "display_name": "Text Key",
+      "type": "MessageTextInput",
+      "info": "Chave que identifica o campo a ser usado como conteúdo de texto.",
+      "advanced": true
+    },
+    {
+      "name": "text_key_validator",
+      "display_name": "Text Key Validator",
+      "type": "BoolInput",
+      "info": "Se ativado, valida se a chave informada existe nos dados.",
+      "advanced": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "data",
+      "display_name": "Data",
+      "type": "Data",
+      "method": "build_data"
+    }
+  ]
+} 
