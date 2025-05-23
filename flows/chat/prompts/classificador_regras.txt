@@ -1,0 +1,70 @@
+Analise a mensagem do usuário, o contexto da empresa, a persona e a **data atual fornecida**. Retorne **exatamente** o seguinte JSON, sem comentários, sem explicações e sem campos extras:
+{
+  "message": "<Pergunta reescrita, clara e objetiva>",
+  "classificador_pergunta": ["<Classificação da pergunta: 'corporativo_global', 'corporativo_local', 'casual' ou 'internet'>"],
+  "foco_analise": "<Opcional: palavras-chave ou frase curta para guiar a análise global>",
+  "restricoes_temporais": {
+    "ordenacao_campo": "<string, default 'atualizado_em'>",
+    "ordenacao_direcao": "<'descendente' ou 'ascendente'>",
+    "limite_resultados": "<integer>",
+    "data_inicio_gte": "<string, data ISO 8601>",
+    "data_fim_lte": "<string, data ISO 8601>"
+  },
+  "rerank_pesos": {
+    "lexical": <Peso para busca lexical (0.0 a 1.0)>,
+    "semantic": <Peso para busca semântica (0.0 a 1.0)>
+  }
+}
+
+---
+**Regras Gerais de Formatação JSON:**
+- Sempre inclua todos os campos (`message`, `classificador_pergunta`, `foco_analise`, `restricoes_temporais`, `rerank_pesos`), mesmo que algum valor esteja vazio (use string vazia, array vazio, objeto vazio {} ou 0.0 onde aplicável).
+- Use apenas aspas duplas e formatação JSON válida.
+- Não adicione comentários ou explicações fora da estrutura JSON solicitada.
+
+---
+**Exemplo de Saída JSON Esperada:**
+{
+  "message": "Quais foram as estratégias de mercado discutidas na última reunião da DNA Capital?",
+  "classificador_pergunta": ["corporativo_local"],
+  "foco_analise": "",
+  "restricoes_temporais": {
+    "ordenacao_campo": "atualizado_em",
+    "ordenacao_direcao": "descendente",
+    "limite_resultados": 1
+  },
+  "rerank_pesos": {
+    "lexical": 0.7,
+    "semantic": 0.3
+  }
+}
+
+{
+  "message": "Resuma os principais pontos da última apresentação sobre IA.",
+  "classificador_pergunta": ["corporativo_global"],
+  "foco_analise": "principais pontos da apresentação sobre IA",
+  "restricoes_temporais": {
+    "ordenacao_campo": "atualizado_em",
+    "ordenacao_direcao": "descendente",
+    "limite_resultados": 1
+  },
+  "rerank_pesos": {
+    "lexical": 0.2,
+    "semantic": 0.8
+  }
+}
+
+{
+  "message": "Compare as estratégias das últimas duas reuniões de mercado.",
+  "classificador_pergunta": ["corporativo_global"],
+  "foco_analise": "comparação de estratégias de reuniões de mercado",
+  "restricoes_temporais": {
+    "ordenacao_campo": "atualizado_em",
+    "ordenacao_direcao": "descendente",
+    "limite_resultados": 2
+  },
+  "rerank_pesos": {
+    "lexical": 0.3,
+    "semantic": 0.7
+  }
+} 

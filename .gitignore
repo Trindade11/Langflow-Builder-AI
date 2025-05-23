@@ -51,8 +51,11 @@ logs/
 *.pth
 *.onnx
 *.h5
-data/
 models/
+
+# Permitir knowledge_base.json
+!src/core/data/
+!src/core/data/knowledge_base.json
 
 # MongoDB
 mongodb/
