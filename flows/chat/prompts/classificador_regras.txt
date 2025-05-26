@@ -10,11 +10,23 @@ Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual
   "search_instruction": { 
     "search_clause": {
       "compound": {
-        "should": [
-          { "text": { "query": "<termo1_relevante>", "path": ["text"] } },
-          { "text": { "query": "<termo2_relevante>", "path": ["text"] } }
-        ],
-        "minimumShouldMatch": 1
+        "must": [
+          {
+            "compound": {
+              "should": [
+                { "text": { "query": "<termo1_relevante>", "path": ["text"] } },
+                { "text": { "query": "<termo2_relevante>", "path": ["text"] } }
+              ],
+              "minimumShouldMatch": 1
+            }
+          },
+          {
+            "equals": {
+              "path": "classificacao",
+              "value": "<valor_da_classificacao_inferida>"
+            }
+          }
+        ]
       }
     },
     "limit": 50,
@@ -37,9 +49,9 @@ Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual
 ---
 **Exemplo de Saída JSON Esperada (Data Atual para exemplos: 2024-08-22):**
 
-// Exemplo 1: MUITO SIMPLIFICADO PARA TESTE - AGORA COM 'SHOULD' E SEM FILTER INTERNO
+// Exemplo 1: COM FILTRO DE CLASSIFICAÇÃO INFERIDO
 {
-  "message": "Quais foram as ações discutidas na última reunião da DNA Capital?",
+  "message": "Quais foram as ações discutidas na última ata da DNA Capital?",
   "classificador_pergunta": ["corporativo_local"],
   "foco_analise": "",
   "rerank_pesos": {
@@ -48,50 +60,69 @@ Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual
   },
   "search_instruction": {
     "search_clause": {
-      "compound": { 
-        "should": [ 
-          { "text": { "query": "ações", "path": ["text"] } },
-          { "text": { "query": "DNA Capital", "path": ["text"] } },
-          { "text": { "query": "reunião", "path": ["text"] } }
-        ],
-        "minimumShouldMatch": 1
-      }
-    },
-    "limit": 50, 
-    "sort_stage": { "atualizado_em": -1 },
-    "min_score": 0.1 
-  },
-  "temporal_constraints": "Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):\n- Evento chave: 'última reunião' da 'DNA Capital' sobre 'ações'.\n- Objetivo da Filtragem Temporal: Dos chunks recuperados classificados como 'reunião' e relacionados à 'DNA Capital', identificar o conjunto de chunks que pertencem ao evento (identificado pelo campo 'id') com a data 'atualizado_em' mais recente. Todos os chunks deste evento devem ser selecionados."
-}
-
-
-// Exemplo 2: AJUSTADO PARA O NOVO PADRÃO 'SHOULD' E SEM FILTER INTERNO
-{
-  "message": "Resuma os principais pontos da última apresentação sobre IA ocorrida na semana passada.",
-  "classificador_pergunta": ["corporativo_global"],
-  "foco_analise": "principais pontos apresentação IA",
-  "rerank_pesos": {
-    "lexical": 0.2,
-    "semantic": 0.8
-  },
-  "search_instruction": {
-    "search_clause": {
-      "compound": { 
-        "should": [ 
-          { "text": { "query": "apresentação", "path": ["text"] } },
-          { "text": { "query": "IA", "path": ["text"] } }
-        ],
-        "minimumShouldMatch": 1
+      "compound": {
+        "must": [
+          {
+            "compound": {
+              "should": [
+                { "text": { "query": "ações", "path": ["text"] } },
+                { "text": { "query": "DNA Capital", "path": ["text"] } },
+                { "text": { "query": "ata", "path": ["text"] } }
+              ],
+              "minimumShouldMatch": 1
+            }
+          },
+          {
+            "equals": {
+              "path": "classificacao",
+              "value": "ata"
+            }
+          }
+        ]
       }
     },
     "limit": 50,
     "sort_stage": { "atualizado_em": -1 },
     "min_score": 0.1
   },
-  "temporal_constraints": "Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):\n- Evento: 'última apresentação sobre IA'.\n- Restrição temporal relativa: 'semana passada'. Considerando a data atual, isso corresponde ao período de 2024-08-12 a 2024-08-18.\n- Objetivo da Filtragem Temporal: Selecionar chunks classificados como 'apresentação' (ou similar) sobre 'IA' cuja 'atualizado_em' esteja dentro do período de 'semana passada' (2024-08-12 a 2024-08-18), e focar na mais recente dentro desse período se houver múltiplas."
+  "temporal_constraints": "Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):\n- Evento chave: 'última ata' da 'DNA Capital' sobre 'ações'.\n- Objetivo da Filtragem Temporal: Dos chunks recuperados classificados como 'ata' e relacionados à 'DNA Capital', identificar o conjunto de chunks que pertencem ao evento (identificado pelo campo 'id') com a data 'atualizado_em' mais recente. Todos os chunks deste evento devem ser selecionados."
 }
 
-// Exemplo 3: ATUALIZADO PARA O PADRÃO 'SHOULD' E SEM FILTER INTERNO
+
+// Exemplo 2: SEM FILTRO DE CLASSIFICAÇÃO (PERGUNTA GENÉRICA)
+{
+  "message": "Resuma os principais pontos sobre IA da semana passada.",
+  "classificador_pergunta": ["corporativo_global"],
+  "foco_analise": "principais pontos IA",
+  "rerank_pesos": {
+    "lexical": 0.2,
+    "semantic": 0.8
+  },
+  "search_instruction": {
+    "search_clause": {
+      "compound": {
+        "must": [
+          {
+            "compound": {
+              "should": [
+                { "text": { "query": "pontos", "path": ["text"] } },
+                { "text": { "query": "IA", "path": ["text"] } }
+              ],
+              "minimumShouldMatch": 1
+            }
+          }
+          // Sem filtro equals aqui pois não há classificação específica
+        ]
+      }
+    },
+    "limit": 50,
+    "sort_stage": { "atualizado_em": -1 },
+    "min_score": 0.1
+  },
+  "temporal_constraints": "Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):\n- Evento: 'principais pontos sobre IA'.\n- Restrição temporal relativa: 'semana passada'. Considerando a data atual, isso corresponde ao período de 2024-08-12 a 2024-08-18.\n- Objetivo da Filtragem Temporal: Selecionar chunks sobre 'IA' cuja 'atualizado_em' esteja dentro do período de 'semana passada' (2024-08-12 a 2024-08-18)."
+}
+
+// Exemplo 3: COM FILTRO DE CLASSIFICAÇÃO INFERIDO
 {
   "message": "Compare as estratégias das últimas duas reuniões de mercado.",
   "classificador_pergunta": ["corporativo_global"],
@@ -103,15 +134,26 @@ Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual
   "search_instruction": {
     "search_clause": {
       "compound": {
-        "should": [ 
-          { "text": { "query": "estratégias", "path": ["text"] } },
-          { "text": { "query": "reuniões", "path": ["text"] } }, 
-          { "text": { "query": "mercado", "path": ["text"] } }
-        ],
-        "minimumShouldMatch": 1
+        "must": [
+          {
+            "compound": {
+              "should": [
+                { "text": { "query": "estratégias", "path": ["text"] } },
+                { "text": { "query": "mercado", "path": ["text"] } }
+              ],
+              "minimumShouldMatch": 1
+            }
+          },
+          {
+            "equals": {
+              "path": "classificacao",
+              "value": "reunião"
+            }
+          }
+        ]
       }
     },
-    "limit": 70, 
+    "limit": 70,
     "sort_stage": { "atualizado_em": -1 },
     "min_score": 0.1
   },

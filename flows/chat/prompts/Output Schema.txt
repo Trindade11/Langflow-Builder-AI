@@ -74,11 +74,23 @@ Esta busca deve ser abrangente para recuperar candidatos lexicalmente relevantes
 {
   "search_clause": {
     "compound": {
-      "should": [
-        { "text": { "query": "<termo1_chave_da_pergunta>", "path": ["text"] } },
-        { "text": { "query": "<termo2_chave_da_pergunta>", "path": ["text"] } }
-      ],
-      "minimumShouldMatch": 1
+      "must": [
+        {
+          "compound": {
+            "should": [
+              { "text": { "query": "<termo1_chave_da_pergunta>", "path": ["text"] } },
+              { "text": { "query": "<termo2_chave_da_pergunta>", "path": ["text"] } }
+            ],
+            "minimumShouldMatch": 1
+          }
+        },
+        {
+          "equals": {
+            "path": "classificacao",
+            "value": "<valor_da_classificacao_inferida>"
+          }
+        }
+      ]
     }
   },
   "min_score": 0.1,
@@ -89,18 +101,55 @@ Esta busca deve ser abrangente para recuperar candidatos lexicalmente relevantes
 
 **Exemplos de Preenchimento de `search_instruction`:**
 
-*   **Usuário:** “Quais foram as ações discutidas na última reunião sobre o Projeto Alfa?”
+*   **Usuário:** "Quais foram as ações discutidas na última ata da DNA Capital?"
     *   **LLM gera `search_instruction` (foco lexical):**
         ```json
         {
           "search_clause": {
             "compound": {
-              "should": [
-                { "text": { "query": "ações", "path": ["text"] } },
-                { "text": { "query": "Projeto Alfa", "path": ["text"] } },
-                { "text": { "query": "reunião", "path": ["text"] } }
-              ],
-              "minimumShouldMatch": 1
+              "must": [
+                {
+                  "compound": {
+                    "should": [
+                      { "text": { "query": "ações", "path": ["text"] } },
+                      { "text": { "query": "DNA Capital", "path": ["text"] } },
+                      { "text": { "query": "ata", "path": ["text"] } }
+                    ],
+                    "minimumShouldMatch": 1
+                  }
+                },
+                {
+                  "equals": {
+                    "path": "classificacao",
+                    "value": "ata"
+                  }
+                }
+              ]
+            }
+          },
+          "sort_stage": { "atualizado_em": -1 },
+          "limit": 50,
+          "min_score": 0.1
+        }
+        ```
+
+*   **Usuário:** "Me fale sobre o Projeto Ômega." (Nenhuma classificação explícita)
+    *   **LLM gera `search_instruction` (foco lexical):**
+        ```json
+        {
+          "search_clause": {
+            "compound": {
+              "must": [
+                {
+                  "compound": {
+                    "should": [
+                      { "text": { "query": "Projeto Ômega", "path": ["text"] } }
+                    ],
+                    "minimumShouldMatch": 1
+                  }
+                }
+                // Nenhum filtro equals aqui, pois não há classificação específica inferida
+              ]
             }
           },
           "sort_stage": { "atualizado_em": -1 },
@@ -125,7 +174,7 @@ O LLM que gera este campo DEVE utilizar a `{data_atual}` fornecida no prompt par
 
 **Exemplos de Preenchimento de `temporal_constraints`:**
 
-*   **Usuário:** “Quais foram as ações discutidas na última reunião sobre o Projeto Alfa?” (Data Atual: 2024-08-22)
+*   **Usuário:** "Quais foram as ações discutidas na última reunião sobre o Projeto Alfa?" (Data Atual: 2024-08-22)
     *   **LLM gera `temporal_constraints`:**
         ```
         Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):
@@ -135,7 +184,7 @@ O LLM que gera este campo DEVE utilizar a `{data_atual}` fornecida no prompt par
         - Objetivo da Filtragem Temporal: Dos chunks recuperados pela busca lexical que mencionam 'Projeto Alfa' e são classificados como 'reunião', identificar o conjunto de chunks que pertencem ao evento (identificado pelo campo 'id' do documento/evento) com a data 'atualizado_em' mais recente. Todos os chunks associados a este 'id' de evento mais recente devem ser selecionados.
         ```
 
-*   **Usuário:** “Documentos sobre compliance de 15 de maio de 2024 até 30 de maio de 2024.” (Data Atual: 2024-08-22)
+*   **Usuário:** "Documentos sobre compliance de 15 de maio de 2024 até 30 de maio de 2024." (Data Atual: 2024-08-22)
     *   **LLM gera `temporal_constraints`:**
         ```
         Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):
@@ -144,7 +193,7 @@ O LLM que gera este campo DEVE utilizar a `{data_atual}` fornecida no prompt par
         - Objetivo da Filtragem Temporal: Selecionar todos os chunks cuja data 'atualizado_em' esteja entre 2024-05-15T00:00:00Z (inclusive) e 2024-05-30T23:59:59Z (inclusive).
         ```
 
-*   **Usuário:** “O que aconteceu nas reuniões do setor de Risco nos últimos 2 meses?” (Data Atual: 2024-08-22)
+*   **Usuário:** "O que aconteceu nas reuniões do setor de Risco nos últimos 2 meses?" (Data Atual: 2024-08-22)
     *   **LLM gera `temporal_constraints`:**
         ```
         Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):
@@ -155,7 +204,7 @@ O LLM que gera este campo DEVE utilizar a `{data_atual}` fornecida no prompt par
         - Objetivo da Filtragem Temporal: Selecionar todos os chunks classificados como 'reunião', pertencentes ao 'setor de Risco', e cuja data 'atualizado_em' caia dentro do período calculado de 'últimos 2 meses'.
         ```
 
-*   **Usuário:** “Me fale sobre o projeto Omega.” (Data Atual: 2024-08-22)
+*   **Usuário:** "Me fale sobre o projeto Omega." (Data Atual: 2024-08-22)
     *   **LLM gera `temporal_constraints`:**
         ```
         Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):
