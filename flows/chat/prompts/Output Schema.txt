@@ -1,0 +1,163 @@
+Output Schema:
+
+message:
+
+**Descrição:** Pergunta reescrita, clara e objetiva, considerando contexto e persona.
+**Tipo:** string (sempre presente)
+**Regras:**
+- Preserve nomes próprios, datas, números, siglas e termos técnicos.
+- Corrija ortografia e organize frases curtas.
+**Saída:** apenas a nova pergunta, nada mais.
+
+classificador_pergunta: ( multiple )
+
+
+**Descrição:** Classificação da pergunta segundo critérios de negócio.
+**Tipo:** array de strings (sempre presente, pode ser vazio)
+**Valores possíveis:** "corporativo_global", "corporativo_local", "casual", "internet"
+**Regras:**
+- Sempre retorne um array JSON, mesmo que vazio.
+- Use apenas os valores permitidos.
+- **Critérios de classificação:**
+    - **corporativo_global**: Pergunta que exige análise do documento inteiro (ex: resumos, temas principais, sentimento geral). Geralmente envolve palavras como "resuma", "quais os principais tópicos", "qual o sentimento geral", "visão geral".
+    - **corporativo_local**: Pergunta que busca informações específicas ou trechos (ex: extração de dados, respostas factuais diretas). Geralmente envolve palavras como "qual data", "quem disse", "quanto custou", "o que é X".
+    - **corporativo**: Mantenha este como um fallback geral se a distinção entre global/local não for clara, ou para perguntas corporativas que não se encaixam perfeitamente.
+    - **casual**: Pergunta pessoal, educacional ou de cultura geral, sem ligação direta a dados corporativos.
+    - **internet**: Usuário pede explicitamente "buscar na web" ou solicita informações externas/tempo-real que provavelmente não constam no grafo interno.
+- Não inclua comentários, explicações ou campos extras neste array.
+
+
+foco_analise:
+
+
+**Descrição:** Palavras-chave ou frase curta que indicam o foco principal da análise, especialmente para perguntas `corporativo_global`. Ajuda a direcionar o LLM a extrair as informações mais relevantes do documento completo.
+**Tipo:** string (opcional, pode ser uma string vazia se não aplicável ou se a pergunta já for muito específica)
+**Regras:**
+- Se a pergunta `corporativo_global` for genérica (ex: "Analise este documento"), o LLM deve inferir um foco (ex: "principais pontos e conclusões").
+- Se a pergunta já indicar um foco (ex: "Resuma as decisões tomadas"), este campo pode refletir isso (ex: "decisões tomadas").
+- Para perguntas `corporativo_local`, `casual` ou `internet`, este campo geralmente será uma string vazia.
+**Saída:** uma string concisa ou vazia.
+
+rerank_pesos:
+
+**Descrição:** Pesos sugeridos para o rerank dos resultados, conforme o tipo de pergunta.
+**Tipo:** objeto JSON com dois campos: `lexical` e `semantic` (ambos float, somando 1.0)
+**Regras:**
+- Sempre retorne ambos os campos (`lexical` e `semantic`), mesmo que um deles seja 0.0.
+- Os valores devem ser floats entre 0.0 e 1.0, somando exatamente 1.0.
+- Use ponto como separador decimal.
+- **Critérios para definição dos pesos:**
+    - Se a pergunta for objetiva, técnica ou buscar termos exatos, priorize `lexical` (ex: 0.7 lexical, 0.3 semantic).
+    - Se a pergunta for aberta, subjetiva ou de contexto amplo, priorize `semantic` (ex: 0.3 lexical, 0.7 semantic).
+    - Se não tiver certeza, use 0.5 para cada.
+- Não inclua campos extras neste objeto.
+
+search_instruction:
+
+**Descrição:** Objeto JSON contendo as instruções para a **busca lexical inicial** no MongoDB Atlas Search.
+Esta busca deve ser abrangente para recuperar candidatos lexicalmente relevantes. A filtragem temporal complexa será feita em uma etapa posterior por um LLM dedicado.
+
+**Tipo:** objeto JSON (sempre presente)
+
+**Regras Gerais para `search_instruction` (Busca Lexical Inicial):**
+- O LLM deve construir este objeto focado nos termos da pergunta, caminhos de busca e filtros não-temporais diretos (ex: `classificacao: "reuniao"`).
+- **Não inclua aqui filtros de data complexos (range para "última semana", etc.) ou lógica para "última reunião".** Isso será tratado pela etapa de Filtragem Temporal Inteligente.
+- `search_clause`: Deve conter as cláusulas `text`, `compound`, etc., para a busca lexical.
+- `sort_stage`: Pode incluir uma ordenação genérica, como `{"atualizado_em": -1}` para trazer documentos mais recentes primeiro, se aplicável de forma geral.
+- `limit`: Use um limite generoso (ex: `50` ou `100`) para garantir que a etapa de Filtragem Temporal Inteligente tenha material suficiente para trabalhar.
+- `min_score`: Opcional.
+- `filter_stages`: Opcional, para filtros $match simples após o $search.
+
+**Estrutura do Objeto `search_instruction`:**
+
+```json
+{
+  "search_clause": {
+    "compound": {
+      "should": [
+        { "text": { "query": "<termo1_chave_da_pergunta>", "path": ["text"] } },
+        { "text": { "query": "<termo2_chave_da_pergunta>", "path": ["text"] } }
+      ],
+      "minimumShouldMatch": 1
+    }
+  },
+  "min_score": 0.1,
+  "sort_stage": { "atualizado_em": -1 },
+  "limit": 50
+}
+```
+
+**Exemplos de Preenchimento de `search_instruction`:**
+
+*   **Usuário:** “Quais foram as ações discutidas na última reunião sobre o Projeto Alfa?”
+    *   **LLM gera `search_instruction` (foco lexical):**
+        ```json
+        {
+          "search_clause": {
+            "compound": {
+              "should": [
+                { "text": { "query": "ações", "path": ["text"] } },
+                { "text": { "query": "Projeto Alfa", "path": ["text"] } },
+                { "text": { "query": "reunião", "path": ["text"] } }
+              ],
+              "minimumShouldMatch": 1
+            }
+          },
+          "sort_stage": { "atualizado_em": -1 },
+          "limit": 50,
+          "min_score": 0.1
+        }
+        ```
+
+temporal_constraints:
+
+**Descrição:** Um texto detalhado e contextualizado que descreve as restrições e intenções temporais da pergunta do usuário. Este texto servirá como prompt/contexto principal para um LLM subsequente na etapa de "Filtragem Temporal Inteligente", que analisará os chunks recuperados pela busca lexical.
+O LLM que gera este campo DEVE utilizar a `{data_atual}` fornecida no prompt para resolver e contextualizar quaisquer referências temporais relativas (ex: "semana passada", "últimos 3 meses", "ontem").
+
+**Tipo:** string (sempre presente, pode ser um texto indicando "Nenhuma restrição temporal específica identificada" se for o caso)
+
+**Regras para `temporal_constraints`:**
+- O texto deve ser claro, abrangente e fornecer todo o contexto temporal necessário para o LLM da próxima etapa.
+- Deve explicitar a interpretação de termos como "última", "mais recente", "período X", etc.
+- Indicar quais campos dos documentos (chunks) são relevantes para a análise temporal (ex: `atualizado_em`, `classificacao`, `id` do evento/documento).
+- Se houver múltiplos critérios temporais, descrever como eles interagem.
+- Mencionar a `{data_atual}` usada para a interpretação.
+
+**Exemplos de Preenchimento de `temporal_constraints`:**
+
+*   **Usuário:** “Quais foram as ações discutidas na última reunião sobre o Projeto Alfa?” (Data Atual: 2024-08-22)
+    *   **LLM gera `temporal_constraints`:**
+        ```
+        Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):
+        - Intenção principal: Localizar informações sobre 'ações'.
+        - Evento chave: 'última reunião'. Isso se refere à instância mais recente de um evento com 'classificacao: "reunião"'.
+        - Tópico do evento: 'Projeto Alfa'.
+        - Objetivo da Filtragem Temporal: Dos chunks recuperados pela busca lexical que mencionam 'Projeto Alfa' e são classificados como 'reunião', identificar o conjunto de chunks que pertencem ao evento (identificado pelo campo 'id' do documento/evento) com a data 'atualizado_em' mais recente. Todos os chunks associados a este 'id' de evento mais recente devem ser selecionados.
+        ```
+
+*   **Usuário:** “Documentos sobre compliance de 15 de maio de 2024 até 30 de maio de 2024.” (Data Atual: 2024-08-22)
+    *   **LLM gera `temporal_constraints`:**
+        ```
+        Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):
+        - Intenção principal: Localizar 'documentos' sobre 'compliance'.
+        - Restrição temporal explícita: Um intervalo de datas específico.
+        - Objetivo da Filtragem Temporal: Selecionar todos os chunks cuja data 'atualizado_em' esteja entre 2024-05-15T00:00:00Z (inclusive) e 2024-05-30T23:59:59Z (inclusive).
+        ```
+
+*   **Usuário:** “O que aconteceu nas reuniões do setor de Risco nos últimos 2 meses?” (Data Atual: 2024-08-22)
+    *   **LLM gera `temporal_constraints`:**
+        ```
+        Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):
+        - Intenção principal: Informações gerais sobre eventos.
+        - Tipo de evento: 'reuniões' (documentos com 'classificacao: "reunião"').
+        - Filtro adicional: 'setor de Risco' (verificar campo 'setores' nos documentos).
+        - Restrição temporal relativa: 'últimos 2 meses'. Considerando a data atual (2024-08-22), isso corresponde aproximadamente ao período de 2024-06-22 a 2024-08-22.
+        - Objetivo da Filtragem Temporal: Selecionar todos os chunks classificados como 'reunião', pertencentes ao 'setor de Risco', e cuja data 'atualizado_em' caia dentro do período calculado de 'últimos 2 meses'.
+        ```
+
+*   **Usuário:** “Me fale sobre o projeto Omega.” (Data Atual: 2024-08-22)
+    *   **LLM gera `temporal_constraints`:**
+        ```
+        Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):
+        - Nenhuma restrição temporal específica foi identificada na pergunta. A busca deve focar na relevância do conteúdo para 'projeto Omega' sem filtros temporais adicionais nesta etapa.
+        ```

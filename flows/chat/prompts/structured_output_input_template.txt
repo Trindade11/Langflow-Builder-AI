@@ -16,4 +16,18 @@
 
 ---
 
-{regras} 
+# **Data atual:**
+
+{data_atual}
+
+---
+
+# **Mapeamento de Campos do Índice e Estrutura de Dados (para search_instruction):**
+
+{llm_field_mapping}
+
+---
+
+# **Regras:**
+
+{regras}

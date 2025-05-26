@@ -1,0 +1,91 @@
+
+====================================
+Guia Rápido de Git para Iniciantes
+====================================
+
+Autor: Rodrigo Trindade
+Projeto: Langflow-Builder-AI
+Repositório: https://github.com/Trindade11/Langflow-Builder-AI.git
+
+--------------------------------------------------
+📌 CONCEITOS BÁSICOS
+--------------------------------------------------
+
+- CLONAR = Baixar pela primeira vez (git clone)
+- PUXAR = Atualizar com o que está no GitHub (git pull)
+- ENVIAR = Subir alterações para o GitHub (git push)
+- COMMIT = Registrar uma alteração com mensagem
+- ADD = Marcar quais arquivos serão incluídos no commit
+- BRANCH = Linha de desenvolvimento (ex: main)
+
+--------------------------------------------------
+🚀 PRIMEIRA VEZ: CLONAR O REPOSITÓRIO
+--------------------------------------------------
+
+git clone https://github.com/Trindade11/Langflow-Builder-AI.git
+cd Langflow-Builder-AI
+
+--------------------------------------------------
+📥 PARA ATUALIZAR O QUE TEM NO GITHUB
+--------------------------------------------------
+
+git pull origin main
+
+--------------------------------------------------
+✍️ PARA SUBIR ARQUIVOS PARA O GITHUB (MELHORES PRÁTICAS)
+--------------------------------------------------
+
+# PASSO 0: GARANTA QUE TODOS OS SEUS ARQUIVOS ESTÃO SALVOS NO SEU EDITOR!
+
+# PASSO 1: PUXE AS ÚLTIMAS ALTERAÇÕES DO GITHUB
+# Isso evita conflitos e garante que você está trabalhando na versão mais recente.
+# Se houver conflitos, o Git avisará e você precisará resolvê-los antes de prosseguir.
+git pull origin main
+
+# PASSO 2: VERIFIQUE O STATUS (OPCIONAL, MAS RECOMENDADO)
+# Mostra quais arquivos foram modificados, adicionados ou excluídos.
+git status
+
+# PASSO 3: ADICIONE OS ARQUIVOS QUE VOCÊ QUER ENVIAR
+# O comando abaixo adiciona TODOS os arquivos modificados e novos no diretório atual e subdiretórios.
+# Se quiser adicionar arquivos específicos, use: git add nome_do_arquivo.ext
+git add .
+
+# PASSO 4: FAÇA O COMMIT DAS SUAS ALTERAÇÕES
+# O "commit" é como salvar um ponto na história do seu projeto.
+# A mensagem (-m) deve ser clara e descrever o que você fez.
+# Boas mensagens ajudam a entender o histórico do projeto.
+# Exemplo: git commit -m "Adiciona funcionalidade X ao componente Y"
+git commit -m "Sua mensagem descritiva aqui"
+
+# PASSO 5: ENVIE SEUS COMMITS PARA O GITHUB
+# Isso envia todas as alterações que você "commitou" para o repositório remoto.
+git push origin main
+
+--------------------------------------------------
+🧩 OUTROS COMANDOS ÚTEIS
+--------------------------------------------------
+
+git branch                # Mostra a branch atual (normalmente: main)
+git log                   # Mostra o histórico de commits
+git remote -v             # Mostra para onde está enviando/puxando
+
+--------------------------------------------------
+⚠️ SOBRE WARNINGS DE LF/CRLF (QUEBRAS DE LINHA)
+--------------------------------------------------
+
+# Se você vir um warning como "LF will be replaced by CRLF", isso se refere
+# a como diferentes sistemas operacionais (Windows vs. Linux/Mac) lidam com
+# quebras de linha em arquivos de texto. 
+# Geralmente, o Git está configurado para normalizar isso automaticamente e
+# não costuma ser um problema para o funcionamento do código, mas é bom saber.
+# Para a maioria dos casos, pode ignorar este warning se o Git completar a operação.
+
+--------------------------------------------------
+✔️ DICA FINAL
+--------------------------------------------------
+
+Sempre execute:
+git pull origin main
+ANTES de começar a modificar o projeto!
+

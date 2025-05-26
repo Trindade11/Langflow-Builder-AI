@@ -1,70 +1,119 @@
-Analise a mensagem do usuário, o contexto da empresa, a persona e a **data atual fornecida**. Retorne **exatamente** o seguinte JSON, sem comentários, sem explicações e sem campos extras:
+Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual fornecida** e o **mapeamento de campos do índice (`llm_field_mapping`)**. Retorne **exatamente** o seguinte JSON, sem comentários, sem explicações e sem campos extras:
 {
   "message": "<Pergunta reescrita, clara e objetiva>",
   "classificador_pergunta": ["<Classificação da pergunta: 'corporativo_global', 'corporativo_local', 'casual' ou 'internet'>"],
   "foco_analise": "<Opcional: palavras-chave ou frase curta para guiar a análise global>",
-  "restricoes_temporais": {
-    "ordenacao_campo": "<string, default 'atualizado_em'>",
-    "ordenacao_direcao": "<'descendente' ou 'ascendente'>",
-    "limite_resultados": "<integer>",
-    "data_inicio_gte": "<string, data ISO 8601>",
-    "data_fim_lte": "<string, data ISO 8601>"
-  },
   "rerank_pesos": {
-    "lexical": <Peso para busca lexical (0.0 a 1.0)>,
-    "semantic": <Peso para busca semântica (0.0 a 1.0)>
-  }
+    "lexical": 0.0,
+    "semantic": 0.0
+  },
+  "search_instruction": { 
+    "search_clause": {
+      "compound": {
+        "should": [
+          { "text": { "query": "<termo1_relevante>", "path": ["text"] } },
+          { "text": { "query": "<termo2_relevante>", "path": ["text"] } }
+        ],
+        "minimumShouldMatch": 1
+      }
+    },
+    "limit": 50,
+    "sort_stage": { "atualizado_em": -1 },
+    "min_score": 0.1
+  },
+  "temporal_constraints": "<Texto descritivo detalhado sobre as restrições temporais da pergunta. Usar {data_atual} para contextualizar. Indicar 'Nenhuma restrição temporal específica identificada' se aplicável.>"
 }
 
 ---
 **Regras Gerais de Formatação JSON:**
-- Sempre inclua todos os campos (`message`, `classificador_pergunta`, `foco_analise`, `restricoes_temporais`, `rerank_pesos`), mesmo que algum valor esteja vazio (use string vazia, array vazio, objeto vazio {} ou 0.0 onde aplicável).
-- Use apenas aspas duplas e formatação JSON válida.
-- Não adicione comentários ou explicações fora da estrutura JSON solicitada.
+- Todos os campos do nível raiz (`message`, `classificador_pergunta`, `foco_analise`, `rerank_pesos`, `search_instruction`, `temporal_constraints`) são obrigatórios e devem ser irmãos.
+- `rerank_pesos` deve ser um objeto JSON simples apenas com `lexical` e `semantic`.
+- `search_instruction` deve ser um objeto JSON contendo `search_clause`, `limit`, `sort_stage`, e opcionalmente `min_score` como seus filhos diretos.
+- Dentro de `search_instruction.search_clause.compound`, o array `filter` (se presente) deve ser irmão de `must` e deve conter **apenas objetos JSON que representem cláusulas de filtro válidas do Atlas Search**. Não inclua strings literais ou placeholders textuais diretamente como elementos deste array.
+- O campo `path` em todas as cláusulas de busca (ex: `text`) deve ser um array de strings (ex: `["text"]`, `["classificacao"]`).
+- Use apenas aspas duplas e formatação JSON válida. Não adicione comentários ou campos não definidos no schema.
+
 
 ---
-**Exemplo de Saída JSON Esperada:**
+**Exemplo de Saída JSON Esperada (Data Atual para exemplos: 2024-08-22):**
+
+// Exemplo 1: MUITO SIMPLIFICADO PARA TESTE - AGORA COM 'SHOULD' E SEM FILTER INTERNO
 {
-  "message": "Quais foram as estratégias de mercado discutidas na última reunião da DNA Capital?",
+  "message": "Quais foram as ações discutidas na última reunião da DNA Capital?",
   "classificador_pergunta": ["corporativo_local"],
   "foco_analise": "",
-  "restricoes_temporais": {
-    "ordenacao_campo": "atualizado_em",
-    "ordenacao_direcao": "descendente",
-    "limite_resultados": 1
-  },
   "rerank_pesos": {
     "lexical": 0.7,
     "semantic": 0.3
-  }
+  },
+  "search_instruction": {
+    "search_clause": {
+      "compound": { 
+        "should": [ 
+          { "text": { "query": "ações", "path": ["text"] } },
+          { "text": { "query": "DNA Capital", "path": ["text"] } },
+          { "text": { "query": "reunião", "path": ["text"] } }
+        ],
+        "minimumShouldMatch": 1
+      }
+    },
+    "limit": 50, 
+    "sort_stage": { "atualizado_em": -1 },
+    "min_score": 0.1 
+  },
+  "temporal_constraints": "Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):\n- Evento chave: 'última reunião' da 'DNA Capital' sobre 'ações'.\n- Objetivo da Filtragem Temporal: Dos chunks recuperados classificados como 'reunião' e relacionados à 'DNA Capital', identificar o conjunto de chunks que pertencem ao evento (identificado pelo campo 'id') com a data 'atualizado_em' mais recente. Todos os chunks deste evento devem ser selecionados."
 }
 
+
+// Exemplo 2: AJUSTADO PARA O NOVO PADRÃO 'SHOULD' E SEM FILTER INTERNO
 {
-  "message": "Resuma os principais pontos da última apresentação sobre IA.",
+  "message": "Resuma os principais pontos da última apresentação sobre IA ocorrida na semana passada.",
   "classificador_pergunta": ["corporativo_global"],
-  "foco_analise": "principais pontos da apresentação sobre IA",
-  "restricoes_temporais": {
-    "ordenacao_campo": "atualizado_em",
-    "ordenacao_direcao": "descendente",
-    "limite_resultados": 1
-  },
+  "foco_analise": "principais pontos apresentação IA",
   "rerank_pesos": {
     "lexical": 0.2,
     "semantic": 0.8
-  }
+  },
+  "search_instruction": {
+    "search_clause": {
+      "compound": { 
+        "should": [ 
+          { "text": { "query": "apresentação", "path": ["text"] } },
+          { "text": { "query": "IA", "path": ["text"] } }
+        ],
+        "minimumShouldMatch": 1
+      }
+    },
+    "limit": 50,
+    "sort_stage": { "atualizado_em": -1 },
+    "min_score": 0.1
+  },
+  "temporal_constraints": "Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):\n- Evento: 'última apresentação sobre IA'.\n- Restrição temporal relativa: 'semana passada'. Considerando a data atual, isso corresponde ao período de 2024-08-12 a 2024-08-18.\n- Objetivo da Filtragem Temporal: Selecionar chunks classificados como 'apresentação' (ou similar) sobre 'IA' cuja 'atualizado_em' esteja dentro do período de 'semana passada' (2024-08-12 a 2024-08-18), e focar na mais recente dentro desse período se houver múltiplas."
 }
 
+// Exemplo 3: ATUALIZADO PARA O PADRÃO 'SHOULD' E SEM FILTER INTERNO
 {
   "message": "Compare as estratégias das últimas duas reuniões de mercado.",
   "classificador_pergunta": ["corporativo_global"],
   "foco_analise": "comparação de estratégias de reuniões de mercado",
-  "restricoes_temporais": {
-    "ordenacao_campo": "atualizado_em",
-    "ordenacao_direcao": "descendente",
-    "limite_resultados": 2
-  },
   "rerank_pesos": {
     "lexical": 0.3,
     "semantic": 0.7
-  }
+  },
+  "search_instruction": {
+    "search_clause": {
+      "compound": {
+        "should": [ 
+          { "text": { "query": "estratégias", "path": ["text"] } },
+          { "text": { "query": "reuniões", "path": ["text"] } }, 
+          { "text": { "query": "mercado", "path": ["text"] } }
+        ],
+        "minimumShouldMatch": 1
+      }
+    },
+    "limit": 70, 
+    "sort_stage": { "atualizado_em": -1 },
+    "min_score": 0.1
+  },
+  "temporal_constraints": "Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):\n- Evento: 'últimas duas reuniões de mercado'.\n- Objetivo da Filtragem Temporal: Identificar os dois eventos ('id') mais recentes classificados como 'reunião' e relacionados a 'mercado', ordenados por 'atualizado_em' descendente. Todos os chunks pertencentes a esses dois eventos devem ser selecionados."
 } 

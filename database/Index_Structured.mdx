@@ -1,0 +1,75 @@
+---
+title: Estrutura do Banco de Dados - DeepContext
+---
+
+
+# 🧠 Estrutura do Banco de Dados: `DeepContext`
+
+Abaixo está a estrutura atual do banco de dados em construção, utilizado no projeto **DeepContext**.
+
+## 🗃️ Banco de Dados
+
+**Nome:** `DeepContext`
+
+## 📚 Coleções
+
+### 1. `knowledge_nodes`
+
+Armazena os nós do grafo de conhecimento, representando entidades, tópicos ou conceitos chave.
+
+---
+
+### 2. `conversation`
+
+Registra as interações e conversas entre usuários e agentes, podendo ser usada para rastrear contexto, histórico ou comportamento.
+
+---
+
+### 3. `knowledge_edges`
+
+Contém as conexões entre os nós (`knowledge_nodes`), representando relações semânticas, hierárquicas ou funcionais.
+
+---
+
+### 4. `knowledge_context`
+
+Responsável por armazenar os chunks de conhecimento derivados de documentos ou transcrições, associados a metadados e contexto.
+
+#### 🔍 Index: `default_knowledge_context`
+
+```json
+{
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "atualizado_em": {
+        "type": "date"
+      },
+      "classificacao": {
+        "type": "token"
+      },
+      "gestor": {
+        "type": "stringFacet"
+      },
+      "id_reuniao": {
+        "type": "token"
+      },
+      "participantes_externos": {
+        "type": "stringFacet"
+      },
+      "participantes_internos": {
+        "type": "stringFacet"
+      },
+      "setores": {
+        "type": "stringFacet"
+      },
+      "text": {
+        "analyzer": "lucene.portuguese",
+        "type": "string"
+      },
+      "tipo": {
+        "type": "token"
+      }
+    }
+  }
+}
