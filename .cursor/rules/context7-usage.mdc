@@ -1,0 +1,19 @@
+---
+description: Orientações para usar o MCP context7 quando precisar de exemplos ou documentação de Langflow e MongoDB Atlas.
+globs: 
+alwaysApply: false
+---
+---
+description: Instruções para usar o MCP context7
+globs:
+  - "**/*.py"
+  - "**/*.ts"
+alwaysApply: false        # "Agent Requested"
+---
+
+Quando o agente precisar de exemplos ou documentação de bibliotecas da stack, execute:
+
+- `use context7 "<biblioteca>"`  
+  - Exemplos: `use context7 langflow`, `use context7 mongodb`
+- Caso não encontre o conteúdo necessário localmente, tente novamente após obter os docs do context7.
+

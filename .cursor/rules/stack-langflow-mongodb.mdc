@@ -1,0 +1,25 @@
+---
+description: Convenções de código e boas práticas para projetos com Langflow e acesso a URI do MongoDB Atlas
+globs: 
+alwaysApply: false
+---
+---
+description: Convensões de código para Langflow + MongoDB Atlas
+globs:
+  - "**/*.py"
+alwaysApply: false
+---
+
+# Langflow  
+- Utilize Langflow como framework visual para prototipar pipelines RAG e agentes multi-LLM.  
+- Prefira componentes oficiais (VectorStoreNode, LLMNode) e documente a cadeia no README.
+
+# MongoDB Atlas  
+- Toda persistência deve usar Atlas (M0 free tier em dev).  
+- Strings de conexão são geradas via Atlas UI e armazenadas em variáveis de ambiente:
+
+export MONGODB_URI="mongodb+srv://trindade:trindade@clustercocreateai.ykdjn.mongodb.net/?retryWrites=true&w=majority&appName=ClusterCoCreateAI"
+
+
+
+

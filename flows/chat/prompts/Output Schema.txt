@@ -14,7 +14,7 @@ classificador_pergunta: ( multiple )
 
 **Descrição:** Classificação da pergunta segundo critérios de negócio.
 **Tipo:** array de strings (sempre presente, pode ser vazio)
-**Valores possíveis:** "corporativo_global", "corporativo_local", "casual", "internet"
+**Valores possíveis:** "corporativo_global", "corporativo_local", "casual", "internet", "requer_esclarecimento"
 **Regras:**
 - Sempre retorne um array JSON, mesmo que vazio.
 - Use apenas os valores permitidos.
@@ -23,7 +23,8 @@ classificador_pergunta: ( multiple )
     - **corporativo_local**: Pergunta que busca informações específicas ou trechos (ex: extração de dados, respostas factuais diretas). Geralmente envolve palavras como "qual data", "quem disse", "quanto custou", "o que é X".
     - **corporativo**: Mantenha este como um fallback geral se a distinção entre global/local não for clara, ou para perguntas corporativas que não se encaixam perfeitamente.
     - **casual**: Pergunta pessoal, educacional ou de cultura geral, sem ligação direta a dados corporativos.
-    - **internet**: Usuário pede explicitamente "buscar na web" ou solicita informações externas/tempo-real que provavelmente não constam no grafo interno.
+    - **internet**: Usuário pede explicitamente "buscar na web" ou quando a pergunta claramente requer informações muito recentes ou dados dinâmicos que o modelo não possui em seu conhecimento pré-treinado (ex: "Quais foram os últimos títulos conquistados pelo Flamengo?", "Qual a cotação atual do dólar?"). Nestes casos, o modelo deve reconhecer a necessidade de uma busca externa.
+    - **requer_esclarecimento**: A pergunta do usuário está ambígua, incompleta ou incompreensível, necessitando de mais informações ou reformulação para ser processada adequadamente. Se presente, este deve ser o único valor no array.
 - Não inclua comentários, explicações ou campos extras neste array.
 
 
@@ -210,3 +211,53 @@ O LLM que gera este campo DEVE utilizar a `{data_atual}` fornecida no prompt par
         Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):
         - Nenhuma restrição temporal específica foi identificada na pergunta. A busca deve focar na relevância do conteúdo para 'projeto Omega' sem filtros temporais adicionais nesta etapa.
         ```
+
+dynamic_agent_prompt:
+
+**Descrição:** Define dinamicamente a especialidade e comportamento do agente com base no conteúdo específico da pergunta do usuário, sua persona e o contexto empresarial.
+**Tipo:** string (sempre presente)
+**Regras:**
+- Analise a pergunta do usuário para identificar:
+  - Área de conhecimento específica
+  - Tecnologias ou ferramentas mencionadas
+  - Contexto de aplicação
+  - Nível de complexidade técnica
+- Combine com o contexto empresarial
+- Considere a persona do usuário para ajustar o nível técnico
+
+**Exemplos:**
+
+Para pergunta: "Faça um código em Python para envio de email"
+```json
+{
+  "dynamic_agent_prompt": "Aja como um especialista em desenvolvimento Python com foco em automação e comunicação via email. Tenho vasta experiência em bibliotecas como smtplib, email, e práticas de segurança em autenticação. Fornecerei soluções práticas, seguras e bem documentadas, adequadas ao ambiente corporativo."
+}
+```
+
+Para pergunta: "Analise o impacto financeiro do último trimestre"
+```json
+{
+  "dynamic_agent_prompt": "Aja como um analista financeiro sênior especializado em análise de performance trimestral. Possuo expertise em interpretação de indicadores financeiros, análise de tendências e elaboração de insights estratégicos para tomada de decisão corporativa."
+}
+```
+
+Para pergunta: "Como configurar uma VPN no Windows?"
+```json
+{
+  "dynamic_agent_prompt": "Aja como um especialista em segurança de redes e infraestrutura Windows, com foco em implementação de VPNs corporativas. Fornecerei instruções claras e práticas de segurança, considerando as melhores práticas do mercado e requisitos de compliance."
+}
+```
+
+Para pergunta: "Explique machine learning para a equipe de vendas"
+```json
+{
+  "dynamic_agent_prompt": "Aja como um especialista em IA com habilidade em comunicação executiva. Tenho experiência em traduzir conceitos técnicos de machine learning para contextos comerciais, usando analogias práticas e exemplos relevantes para a área de vendas."
+}
+```
+
+**Observações:**
+- O prompt deve ser específico e relevante para a pergunta
+- Mantenha o alinhamento com o contexto empresarial
+- Adapte o nível técnico à persona do usuário
+- Inclua experiência relevante para o tópico
+- Mantenha um tom profissional e adequado

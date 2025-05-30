@@ -1,8 +1,9 @@
 Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual fornecida** e o **mapeamento de campos do índice (`llm_field_mapping`)**. Retorne **exatamente** o seguinte JSON, sem comentários, sem explicações e sem campos extras:
 {
   "message": "<Pergunta reescrita, clara e objetiva>",
-  "classificador_pergunta": ["<Classificação da pergunta: 'corporativo_global', 'corporativo_local', 'casual' ou 'internet'>"],
+  "classificador_pergunta": ["<Classificação da pergunta: 'corporativo_global', 'corporativo_local', 'casual', 'internet' ou 'requer_esclarecimento'. Se 'requer_esclarecimento', deve ser o único valor no array.>"],
   "foco_analise": "<Opcional: palavras-chave ou frase curta para guiar a análise global>",
+  "dynamic_agent_prompt": "<Texto descritivo detalhado sobre a persona>",
   "rerank_pesos": {
     "lexical": 0.0,
     "semantic": 0.0
@@ -38,7 +39,9 @@ Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual
 
 ---
 **Regras Gerais de Formatação JSON:**
-- Todos os campos do nível raiz (`message`, `classificador_pergunta`, `foco_analise`, `rerank_pesos`, `search_instruction`, `temporal_constraints`) são obrigatórios e devem ser irmãos.
+- Todos os campos do nível raiz (`message`, `classificador_pergunta`, `foco_analise`, `dynamic_agent_prompt`, `rerank_pesos`, `search_instruction`, `temporal_constraints`) são obrigatórios e devem ser irmãos.
+- Se `classificador_pergunta` contiver `"requer_esclarecimento"`:
+    - `classificador_pergunta` deve ser `["requer_esclarecimento"]`.
 - `rerank_pesos` deve ser um objeto JSON simples apenas com `lexical` e `semantic`.
 - `search_instruction` deve ser um objeto JSON contendo `search_clause`, `limit`, `sort_stage`, e opcionalmente `min_score` como seus filhos diretos.
 - Dentro de `search_instruction.search_clause.compound`, o array `filter` (se presente) deve ser irmão de `must` e deve conter **apenas objetos JSON que representem cláusulas de filtro válidas do Atlas Search**. Não inclua strings literais ou placeholders textuais diretamente como elementos deste array.
@@ -54,6 +57,7 @@ Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual
   "message": "Quais foram as ações discutidas na última ata da DNA Capital?",
   "classificador_pergunta": ["corporativo_local"],
   "foco_analise": "",
+  "dynamic_agent_prompt": "Aja como um especialista em análise documental corporativa com experiência em extração e interpretação de atas. Tenho profundo conhecimento em governança corporativa e práticas de documentação empresarial da DNA Capital.",
   "rerank_pesos": {
     "lexical": 0.7,
     "semantic": 0.3
@@ -94,6 +98,7 @@ Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual
   "message": "Resuma os principais pontos sobre IA da semana passada.",
   "classificador_pergunta": ["corporativo_global"],
   "foco_analise": "principais pontos IA",
+  "dynamic_agent_prompt": "Aja como um analista estratégico especializado em tecnologia e IA, com capacidade de sintetizar tendências e identificar impactos relevantes para o contexto corporativo.",
   "rerank_pesos": {
     "lexical": 0.2,
     "semantic": 0.8
@@ -127,6 +132,7 @@ Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual
   "message": "Compare as estratégias das últimas duas reuniões de mercado.",
   "classificador_pergunta": ["corporativo_global"],
   "foco_analise": "comparação de estratégias de reuniões de mercado",
+  "dynamic_agent_prompt": "Aja como um consultor estratégico especializado em análise comparativa de mercado, com experiência em identificação de padrões e avaliação de estratégias corporativas.",
   "rerank_pesos": {
     "lexical": 0.3,
     "semantic": 0.7
@@ -158,4 +164,31 @@ Analise a mensagem do usuário, o contexto da empresa, a persona, a **data atual
     "min_score": 0.1
   },
   "temporal_constraints": "Contexto Temporal da Pergunta (Data Atual de Referência: 2024-08-22):\n- Evento: 'últimas duas reuniões de mercado'.\n- Objetivo da Filtragem Temporal: Identificar os dois eventos ('id') mais recentes classificados como 'reunião' e relacionados a 'mercado', ordenados por 'atualizado_em' descendente. Todos os chunks pertencentes a esses dois eventos devem ser selecionados."
+}
+
+// Exemplo 4: PERGUNTA AMBÍGUA REQUERENDO ESCLARECIMENTO
+{
+  "message": "Fale sobre aquilo que discutimos.",
+  "classificador_pergunta": ["requer_esclarecimento"],
+  "foco_analise": "aquilo que discutimos",
+  "dynamic_agent_prompt": "Aja como um facilitador de comunicação especializado em esclarecer ambiguidades e conduzir diálogos construtivos para melhor compreensão do contexto.",
+  "rerank_pesos": {
+    "lexical": 0.5,
+    "semantic": 0.5
+  },
+  "search_instruction": {
+    "search_clause": {
+      "compound": {
+        "should": [
+          { "text": { "query": "aquilo", "path": ["text"] } },
+          { "text": { "query": "discutimos", "path": ["text"] } }
+        ],
+        "minimumShouldMatch": 1
+      }
+    },
+    "limit": 50,
+    "sort_stage": { "atualizado_em": -1 },
+    "min_score": 0.1
+  },
+  "temporal_constraints": "Nenhuma restrição temporal específica identificada com base na pergunta ambígua."
 } 

@@ -1,9 +1,20 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import os
+from dotenv import load_dotenv
+from pymongo import MongoClient
 import pymongo
 from bson import ObjectId # Importar ObjectId
 import json # Importar json para serialização
 
-# String de conexão e nome do banco de dados
-MONGO_URI = "mongodb+srv://trindade:trindade@clustercocreateai.ykdjn.mongodb.net/?retryWrites=true&w=majority&appName=ClusterCoCreateAI"
+# Carrega variáveis de ambiente
+load_dotenv()
+
+MONGO_URI = os.getenv("MONGODB_URI")
+if not MONGO_URI:
+    raise ValueError("MONGODB_URI não encontrada nas variáveis de ambiente. Configure o arquivo .env")
+
 DB_NAME = "DeepContext" # ATUALIZADO para DeepContext
 
 # Classe para serializar ObjectId para JSON

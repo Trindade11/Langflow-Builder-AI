@@ -1,8 +1,18 @@
+import json
+import random
+from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
 import pymongo
 from pymongo.operations import SearchIndexModel
 
-# String de conexão e nome do banco de dados
-MONGO_URI = "mongodb+srv://trindade:trindade@clustercocreateai.ykdjn.mongodb.net/?retryWrites=true&w=majority&appName=ClusterCoCreateAI"
+# Carrega variáveis de ambiente
+load_dotenv()
+
+MONGO_URI = os.getenv("MONGODB_URI")
+if not MONGO_URI:
+    raise ValueError("MONGODB_URI não encontrada nas variáveis de ambiente. Configure o arquivo .env")
+
 DB_NAME = "DeepContext"
 TARGET_COLLECTION_NAME = "knowledge_documentation"
 VECTOR_INDEX_NAME = "vector_index_knowledge_documentation"

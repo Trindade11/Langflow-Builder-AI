@@ -2,11 +2,13 @@
 
 Esta pasta armazena os dados e informações que constituem a base de conhecimento do projeto.
 
-**Fonte dos Dados:**
+# Configuração do Banco de Dados
 
+## Informações do Banco:
 *   **Banco de Dados:** MongoDB
-*   **Nome do Banco de Dados:** `DeepContext`
-*   **String de Conexão:** `mongodb+srv://trindade:trindade@clustercocreateai.ykdjn.mongodb.net/?retryWrites=true&w=majority&appName=ClusterCoCreateAI` (Credenciais de exemplo, usar as reais do projeto)
+*   **Nome do Banco:** DeepContext
+*   **String de Conexão:** Configure a variável `MONGODB_URI` no arquivo `.env` com sua string de conexão do MongoDB Atlas
+*   **Exemplo:** `mongodb+srv://seu-usuario:sua-senha@seu-cluster.mongodb.net/?retryWrites=true&w=majority&appName=SeuApp`
 
 **Coleções Identificadas:**
 

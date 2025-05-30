@@ -1,0 +1,132 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Langflow Builder - Metodologia de Desenvolvimento
+
+## 1. Estrutura do Projeto
+
+```
+# Langflow Builder - Metodologia de Desenvolvimento
+
+## 1. Estrutura do Projeto
+
+```
+langflow-builder/
+├── flows/                      # Diretório principal dos fluxos
+│   ├── flow-1/                # Cada fluxo tem seu próprio diretório
+│   │   ├── flow.json         # JSON completo do fluxo
+│   │   ├── README.md         # Documentação do fluxo
+│   │   └── components/       # Componentes específicos deste fluxo
+│   │       ├── component-1/  # Diretório do componente
+│   │       │   ├── README.md # Documentação do componente
+│   │       │   └── config/   # Configurações específicas
+│   │       └── component-2/
+│   └── flow-2/
+├── shared-components/          # Componentes reutilizáveis entre fluxos
+└── docs/                      # Documentação geral do projeto
+
+## 2. Metodologia de Desenvolvimento
+
+### 2.1 Processo de Desenvolvimento
+1. **Definição do Objetivo**
+   - Documentar claramente o propósito do fluxo
+   - Identificar requisitos e integrações necessárias
+
+2. **Estruturação do Fluxo**
+   - Criar diretório do fluxo
+   - Documentar objetivo no README.md
+   - Incluir JSON inicial do fluxo
+
+3. **Componentes**
+   - Identificar componentes únicos pelo ID
+   - Documentar cada componente individualmente
+   - Manter rastreabilidade entre fluxo e componentes
+
+4. **Versionamento**
+   - Manter histórico de versões do JSON
+   - Documentar alterações significativas
+   - Preservar IDs únicos dos componentes
+
+### 2.2 Estrutura do JSON
+- Cada fluxo é representado por um JSON completo
+- IDs únicos para cada componente
+- Manter metadados e configurações no JSON
+- Documentar dependências entre componentes
+
+### 2.3 Componentes
+- README.md para cada componente contendo:
+  - Descrição
+  - Parâmetros de entrada/saída
+  - Dependências
+  - Exemplos de uso
+  - ID único de referência
+
+### 2.4 Evolução do Projeto
+1. **Fase Inicial (Langflow)**
+   - Desenvolvimento via interface Langflow
+   - Documentação de componentes
+   - Testes de integração
+
+2. **Fase de Refatoração**
+   - Análise de performance
+   - Identificação de gargalos
+   - Planejamento de migração
+
+3. **Fase de Produção**
+   - Reimplementação otimizada
+   - Testes de carga
+   - Documentação técnica completa
+
+## 3. Boas Práticas
+
+### 3.1 Documentação
+- Manter README.md atualizado
+- Documentar alterações significativas
+- Incluir exemplos práticos
+
+### 3.2 Versionamento
+- Usar tags para versões estáveis
+- Manter histórico de alterações
+- Documentar breaking changes
+
+### 3.3 Testes
+- Documentar casos de teste
+- Manter cenários de teste
+- Validar integrações
+
+## 4. Fluxo de Trabalho
+
+1. **Inicialização**
+   ```bash
+   flows/
+   └── novo-fluxo/
+       ├── flow.json           # JSON inicial do Langflow
+       ├── README.md          # Objetivo e descrição
+       └── components/        # Componentes específicos
+   ```
+
+2. **Desenvolvimento**
+   - Desenvolver no Langflow
+   - Exportar JSON atualizado
+   - Documentar componentes
+   - Atualizar README.md
+
+3. **Revisão**
+   - Validar funcionamento
+   - Verificar documentação
+   - Testar integrações
+
+4. **Produção**
+   - Avaliar performance
+   - Planejar otimizações
+   - Implementar melhorias 
+
+components/
+└── webhook-receiver/
+    ├── README.md           # Documentação
+    ├── component.py        # Código do componente
+    └── config/
+        ├── settings.json   # Configurações específicas
+        └── schema.json     # Schema de validação 
