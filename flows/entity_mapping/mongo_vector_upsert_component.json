@@ -1,0 +1,78 @@
+{
+  "name": "MongoVectorUpsertComponent",
+  "display_name": "MongoDB Vector Upsert",
+  "description": "Insere/atualiza documentos no MongoDB Atlas com embeddings e suporte a mTLS, campos de lista, campos de data e indexação vetorial.",
+  "icon": "MongoDB",
+  "inputs": [
+    {
+      "name": "mongodb_atlas_cluster_uri",
+      "display_name": "MongoDB Atlas URI",
+      "type": "SecretStrInput",
+      "required": true
+    },
+    {
+      "name": "enable_mtls",
+      "display_name": "Enable mTLS",
+      "type": "BoolInput",
+      "value": false,
+      "advanced": true
+    },
+    {
+      "name": "mongodb_atlas_client_cert",
+      "display_name": "Client Certificate (PEM format)",
+      "type": "SecretStrInput",
+      "required": false
+    },
+    {
+      "name": "db_name",
+      "display_name": "Database Name",
+      "type": "StrInput",
+      "required": true
+    },
+    {
+      "name": "collection_name",
+      "display_name": "Collection Name",
+      "type": "StrInput",
+      "required": true
+    },
+    {
+      "name": "index_name",
+      "display_name": "Index Name",
+      "type": "StrInput",
+      "required": true
+    },
+    {
+      "name": "unique_id_field",
+      "display_name": "Unique ID Field",
+      "type": "StrInput",
+      "info": "Campo usado para upsert do documento",
+      "required": true
+    },
+    {
+      "name": "list_fields_str",
+      "display_name": "Fields to convert to list",
+      "type": "MessageTextInput",
+      "required": false
+    },
+    {
+      "name": "date_fields_str",
+      "display_name": "Date Fields (ISO format)",
+      "type": "MessageTextInput",
+      "info": "Campos a converter do formato ISO 8601",
+      "required": false
+    },
+    {
+      "name": "embedding",
+      "display_name": "Embedding",
+      "type": "HandleInput",
+      "input_types": ["Embeddings"]
+    }
+  ],
+  "outputs": [],
+  "methods": [
+    {
+      "name": "build_vector_store",
+      "description": "Realiza o upsert dos documentos com embeddings no MongoDB Atlas."
+    }
+  ]
+} 

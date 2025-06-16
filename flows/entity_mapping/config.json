@@ -1,0 +1,42 @@
+{
+  "flow_type": "entity_mapping",
+  "version": "1.0.0",
+  "settings": {
+    "webhook": {
+      "endpoint": "/api/v1/entities",
+      "methods": ["POST"],
+      "content_type": "application/json"
+    },
+    "embeddings": {
+      "provider": "azure_openai",
+      "model": "text-embedding-ada-002",
+      "azure_endpoint": "https://example-resource.azure.openai.com/",
+      "azure_deployment": "deployment-name",
+      "api_version": "2023-08-01-preview",
+      "api_key": "<SUA_API_KEY>",
+      "dimensions": 1536
+    },
+    "mongo_vector_upsert": {
+      "collection": "entities",
+      "index": "entity_search"
+    }
+  },
+  "metadata": {
+    "description": "Flow para mapeamento e indexação de entidades corporativas",
+    "author": "Chat Corporativo Team",
+    "created_at": "2024-03-20",
+    "last_updated": "2024-03-20"
+  },
+  "required_fields": [
+    "nome",
+    "descricao",
+    "tipo",
+    "setor"
+  ],
+  "optional_fields": [
+    "tags",
+    "responsavel",
+    "data_criacao",
+    "ultima_atualizacao"
+  ]
+} 

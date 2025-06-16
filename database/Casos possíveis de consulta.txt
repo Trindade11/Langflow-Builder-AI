@@ -1,0 +1,7 @@
+| Intenção do usuário                        | Campo principal de busca | Campos auxiliares                       |
+| ------------------------------------------ | ------------------------ | --------------------------------------- |
+| “O que Rodrigo falou na reunião?”          | `text`                   | `type: reuniao`                         |
+| “Quem participou da reunião X?”            | `participantes`          | `reuniao_id`, `type`                    |
+| “Quais foram os temas discutidos?”         | `tema`                   | `type: reuniao`                         |
+| “Me fale sobre os documentos da empresa A” | `text`                   | `empresa`, `type: documento`            |
+| “O que aconteceu nas últimas 3 reuniões?”  | `text`                   | `range(atualizado_em)`, `type: reuniao` |

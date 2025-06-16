@@ -1,0 +1,67 @@
+{
+  "components": {
+    "CustomComponent-DDTxa": {
+      "path": "components/webhook-receiver",
+      "type": "Webhook",
+      "connections": {
+        "outputs": [
+          {"target": "ParseData-PefPe", "type": "Data"},
+          {"target": "ParseData-XS2ZQ", "type": "Data"}
+        ]
+      }
+    },
+    "AzureOpenAIModel-P8Rf9": {
+      "path": "components/azure-openai",
+      "type": "LanguageModel",
+      "connections": {
+        "outputs": [
+          {"target": "StructuredOutput-78c4L", "type": "LanguageModel"}
+        ]
+      }
+    },
+    "MongoTextSearch-vLX80": {
+      "path": "components/mongo-search",
+      "type": "Database",
+      "connections": {
+        "outputs": [
+          {"target": "ParseJSONData-9XOVm", "type": "Data"}
+        ]
+      }
+    },
+    "StructuredOutput-78c4L": {
+      "path": "components/structured-output",
+      "type": "Processor",
+      "connections": {
+        "inputs": [
+          {"source": "AzureOpenAIModel-P8Rf9", "type": "LanguageModel"},
+          {"source": "Prompt-CznQH", "type": "Message"}
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "flow_id": "chat-flow-1",
+    "version": "1.0.0",
+    "last_updated": "2024-02-20"
+  },
+  "data": {
+    "sourceHandle": {
+      "dataType": "ChatInput",
+      "id": "ChatInput-jFwUm",
+      "name": "message",
+      "output_types": ["Message"]
+    },
+    "targetHandle": {
+      "fieldName": "input_value", 
+      "id": "OpenAIModel-OcXkl",
+      "inputTypes": ["Message"],
+      "type": "str"
+    },
+    "schema": {
+      "Name": "text",
+      "EBITDA": "text",
+      "NET_INCOME": "text",
+      "GROSS_PROFIT": "text"
+    }
+  }
+} 

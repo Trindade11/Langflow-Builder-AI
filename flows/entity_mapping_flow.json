@@ -1,0 +1,72 @@
+{
+  "name": "Entity Mapping Flow",
+  "description": "Flow para mapeamento e indexação de entidades corporativas",
+  "nodes": [
+    {
+      "id": "webhook",
+      "type": "WebhookComponent",
+      "position": {
+        "x": 100,
+        "y": 100
+      },
+      "data": {
+        "payload": ""
+      }
+    },
+    {
+      "id": "text_splitter",
+      "type": "TextSplitterComponent",
+      "position": {
+        "x": 300,
+        "y": 100
+      },
+      "data": {
+        "chunk_size": 1000,
+        "chunk_overlap": 200
+      }
+    },
+    {
+      "id": "embeddings",
+      "type": "EmbeddingsComponent",
+      "position": {
+        "x": 500,
+        "y": 100
+      },
+      "data": {
+        "model_name": "text-embedding-ada-002"
+      }
+    },
+    {
+      "id": "vector_store",
+      "type": "MongoDBAtlasComponent",
+      "position": {
+        "x": 700,
+        "y": 100
+      },
+      "data": {
+        "collection_name": "entities",
+        "index_name": "entity_search"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "webhook",
+      "target": "text_splitter",
+      "sourceHandle": "data",
+      "targetHandle": "input"
+    },
+    {
+      "source": "text_splitter",
+      "target": "embeddings",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    },
+    {
+      "source": "embeddings",
+      "target": "vector_store",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    }
+  ]
+} 
